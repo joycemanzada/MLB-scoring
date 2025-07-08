@@ -18,11 +18,22 @@ def get_mlb_stats_api_data():
 
     for league in data['records']:
         for team in league['teamRecords']:
+            team_name = team['team']['name']
+            run_diff = team.get("runDifferential", 0)
+
+            # Safely extract L10 record
+            try:
+                l10 = team['records']['splitRecords']['lastTen']
+                l10_record = f"{l10['wins']}-{l10['losses']}"
+            except Exception:
+                l10_record = "0-0"
+
             team_records.append({
-                "Team": team['team']['name'],
-                "Run Diff": team.get("runDifferential", 0),
-                "L10 Record": f"{team['records']['splitRecords']['lastTen']['wins']}-{team['records']['splitRecords']['lastTen']['losses']}"
+                "Team": team_name,
+                "Run Diff": run_diff,
+                "L10 Record": l10_record
             })
+
     return pd.DataFrame(team_records)
 
 @st.cache_data(ttl=3600)
